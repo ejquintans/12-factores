@@ -1,15 +1,11 @@
 import logging
 import psycopg2
+import os
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-# Rompe Factor 3: Credenciales y configuración HARDCODEADAS
-# Rompe Factor 10: no se puede cambiar la base de datos sin recopilar, por ende habria dif de codigo entre dev y prod
-DB_HOST = "localhost" # Factor 4: Backing Services (si la base no esta en localhost falla Backing services deben ser intercambiables)
-DB_PORT = 5432 # Factor 7: Port binding
-DB_NAME = "postgres"
-DB_USER = "postgres"
-DB_PASSWORD = "postgres"  # Factor 3: Config
+PORT = int(os.getenv("PORT", "8000"))
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Rompe Factor 11 Logs a archivo
 logging.basicConfig(
