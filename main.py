@@ -3,6 +3,11 @@ import psycopg2
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel
+from database import get_db_connection
+from dotenv import load_dotenv
+
+# Cargar variables del archivo .env
+load_dotenv()
 
 PORT = int(os.getenv("PORT", "8000"))
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -21,18 +26,9 @@ class NoteCreate(BaseModel):
 
 app = FastAPI()
 
-def get_db_connection():
-    return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-
 @app.on_event("startup")
 def create_table():
-    conn = get_db_connection()
+    conn = get_db_connection(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS notes (
@@ -48,7 +44,7 @@ def create_table():
 @app.post("/notes/")
 def create_note(note: NoteCreate):
     """Crea una nota. ¡Guarda estado en DB externa, pero con config fija!"""
-    conn = get_db_connection()
+    conn = get_db_connection(DATABASE_URL)
     cur = conn.cursor()
     cur.execute("INSERT INTO notes (content) VALUES (%s)", (note.content,))
     conn.commit()
