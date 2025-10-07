@@ -13,6 +13,12 @@ note-app/
 └── README.md
 ```
 
+Probar código: 
+
+```bash
+curl -X POST "http://localhost:8000/notes/" -H "Content-Type: application/json" -d '{"content":"Primera nota"}'
+```
+
 
 
 ### **Factor 1: Codebase**
@@ -66,5 +72,27 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 *Tratar los servicios de soporte como recursos adjuntos.* 
 
-- Conéctar a PostgreSQL mediante una URL (ej: `postgresql://user:pass@host:5432/db`).
-- No asumir que está en `localhost`.
+- Conectar a PostgreSQL mediante una URL (ej: `postgresql://postgres:postgres@localhost:5432/postgres`).
+
+```python
+# database.py
+import psycopg2
+def get_db_connection(db_url: str):
+    return psycopg2.connect(db_url)
+```
+
+- Instalar python-dotenv
+
+```bash
+pip install python-dotenv
+```
+
+- Lo incorporo al código:
+
+```python
+from dotenv import load_dotenv # <-- Importar la biblioteca
+
+# Cargar variables del archivo .env
+load_dotenv() 
+```
+
