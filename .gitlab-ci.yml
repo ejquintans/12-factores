@@ -1,0 +1,38 @@
+# Definimos las etapas en orden
+stages:
+  - test
+  - build
+  - deploy
+
+# === ETAPA 1: Test ===
+test:
+  stage: test
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - python -c "import main; print('✅ App importable')"
+
+# === ETAPA 2: Build (Construir la imagen) ===
+build:
+  stage: build
+  image: registry.redhat.io/openshift4/ose-podman
+  script:
+    # Construye la imagen usando Containerfile
+    - podman build -f Containerfile -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+
+    # Inicia sesión en el registry de GitLab
+    - podman login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+    # Sube la imagen al registry
+    - podman push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+
+# === ETAPA 3: Deploy (Desplegar en OpenShift) ===
+deploy-to-openshift:
+  stage: deploy
+  image: registry.redhat.io/openshift4/ose-cli
+  script:
+    # Conectarse a OpenShift
+    - oc login $OPENSHIFT_SERVER --token=$OPENSHIFT_TOKEN
+
+    # Actualizar el deployment con la nueva imagen
+    - oc set image deployment/note-app note-app=$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA -n $OPENSHIFT_PROJECT
