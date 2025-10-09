@@ -1,6 +1,7 @@
 import logging
 import psycopg2
 import os
+import sys
 from fastapi import FastAPI
 from pydantic import BaseModel
 from database import get_db_connection
@@ -13,11 +14,7 @@ PORT = int(os.getenv("PORT", "8000"))
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Rompe Factor 11 Logs a archivo
-logging.basicConfig(
-    filename="app.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger()
 
 # Modelo para FastAPI (esto está bien, no es una mala práctica)
